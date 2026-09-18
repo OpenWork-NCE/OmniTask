@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- Constructor injection intentionally retains the shared Spring service; copying it would bypass its transactional proxy. -->
+  <Match>
+    <Class name="com.omnitask.tasks.TaskController"/>
+    <Method name="&lt;init&gt;"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+</FindBugsFilter>

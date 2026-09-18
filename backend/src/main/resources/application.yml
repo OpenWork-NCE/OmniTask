@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: omnitask-api
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/omnitask?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${DB_USERNAME:omnitask}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      minimum-idle: 0
+      connection-timeout: 10000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+    datatype:
+      enum:
+        fail-on-numbers-for-enums: true
+  mvc:
+    problemdetails:
+      enabled: true
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:omnitask}
+    audience: ${JWT_AUDIENCE:omnitask-api}
+    ttl: PT15M
+    public-key: ${JWT_PUBLIC_KEY}
+    private-key: ${JWT_PRIVATE_KEY}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+logging:
+  level:
+    # MySQL constraint messages can include email addresses and rejected values.
+    org.hibernate.orm.jdbc.error: OFF
+    org.hibernate.orm.jdbc.warn: OFF
+  pattern:
+    level: '%5p [correlationId=%X{correlationId:-}]'
