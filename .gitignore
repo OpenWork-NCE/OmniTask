@@ -1,0 +1,8 @@
+/backend/target/
+/.tools/
+/.env
+/.secrets/
+*.log
+.idea/
+.vscode/
+.DS_Store
