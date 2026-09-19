@@ -4,9 +4,10 @@ import { describe, expect, it } from "vitest";
 import { App } from "./App";
 
 describe("App", () => {
-  it("renders the OmniTask application landmark", () => {
+  it("routes an anonymous visitor to login", async () => {
+    window.history.replaceState({}, "", "/");
     render(<App />);
 
-    expect(screen.getByRole("main", { name: "OmniTask" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeVisible();
   });
 });

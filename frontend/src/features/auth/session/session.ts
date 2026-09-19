@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const SESSION_KEY = "omnitask.session";
+export const SESSION_EXPIRED_EVENT = "omnitask:session-expired";
 
 export type Session = Readonly<{
   accessToken: string;
@@ -39,6 +40,11 @@ export function writeSession(session: Session): void {
 
 export function clearSession(): void {
   sessionStorage.removeItem(SESSION_KEY);
+}
+
+export function expireSession(): void {
+  clearSession();
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
 }
 
 export function sessionFromAccessToken(accessToken: string): Session | null {

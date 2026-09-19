@@ -7,9 +7,10 @@ export const en = {
     closeMenu: "Close navigation"
   },
   auth: {
+    storyTitle: "Make space for work that matters.",
     login: {
       eyebrow: "Welcome back",
-      title: "Sign in to your workspace",
+      title: "Sign in",
       description: "Pick up your priorities exactly where you left them.",
       action: "Sign in",
       pending: "Signing in...",
@@ -29,7 +30,20 @@ export const en = {
       name: "Full name",
       email: "Email address",
       password: "Password",
-      passwordHint: "Use at least 12 characters."
+      passwordHint: "Use at least 12 characters.",
+      showPassword: "Show password",
+      hidePassword: "Hide password"
+    },
+    validation: {
+      emailRequired: "Enter your email address.",
+      emailInvalid: "Enter a valid email address.",
+      emailTooLong: "Email address must contain no more than 254 characters.",
+      passwordRequired: "Enter your password.",
+      passwordTooShort: "Password must contain at least 12 characters.",
+      passwordTooLong: "Password must contain no more than 128 characters."
+    },
+    notices: {
+      accountCreated: "Your account is ready. Sign in to continue."
     }
   },
   tasks: {

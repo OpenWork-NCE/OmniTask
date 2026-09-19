@@ -1,6 +1,6 @@
 import { env } from "@/lib/config/env";
 
-import { readSession } from "@/features/auth/session/session";
+import { expireSession, readSession } from "@/features/auth/session/session";
 
 import { toApiProblem } from "./problem";
 
@@ -31,7 +31,11 @@ export function createHttpClient(dependencies: HttpClientDependencies) {
       headers
     });
 
-    if (!response.ok) throw await toApiProblem(response);
+    if (!response.ok) {
+      const problem = await toApiProblem(response);
+      if (authenticated && problem.status === 401) expireSession();
+      throw problem;
+    }
     if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   };

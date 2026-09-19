@@ -9,9 +9,10 @@ export const fr = {
     closeMenu: "Fermer la navigation"
   },
   auth: {
+    storyTitle: "Faites de la place à ce qui compte vraiment.",
     login: {
       eyebrow: "Heureux de vous revoir",
-      title: "Connectez-vous à votre espace",
+      title: "Connexion",
       description: "Retrouvez vos priorités exactement là où vous les aviez laissées.",
       action: "Se connecter",
       pending: "Connexion en cours...",
@@ -31,7 +32,20 @@ export const fr = {
       name: "Nom complet",
       email: "Adresse e-mail",
       password: "Mot de passe",
-      passwordHint: "Utilisez au moins 12 caractères."
+      passwordHint: "Utilisez au moins 12 caractères.",
+      showPassword: "Afficher le mot de passe",
+      hidePassword: "Masquer le mot de passe"
+    },
+    validation: {
+      emailRequired: "Saisissez votre adresse e-mail.",
+      emailInvalid: "Saisissez une adresse e-mail valide.",
+      emailTooLong: "L’adresse e-mail ne doit pas dépasser 254 caractères.",
+      passwordRequired: "Saisissez votre mot de passe.",
+      passwordTooShort: "Le mot de passe doit contenir au moins 12 caractères.",
+      passwordTooLong: "Le mot de passe ne doit pas dépasser 128 caractères."
+    },
+    notices: {
+      accountCreated: "Votre compte est prêt. Connectez-vous pour continuer."
     }
   },
   tasks: {
