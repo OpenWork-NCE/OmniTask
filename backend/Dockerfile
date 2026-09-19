@@ -20,7 +20,8 @@ RUN apt-get update \
     && apt-get install --no-install-recommends --yes curl \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid 10001 omnitask \
-    && useradd --system --uid 10001 --gid omnitask \
+    && (getent group 1000 >/dev/null || groupadd --system --gid 1000 render-secrets) \
+    && useradd --system --uid 10001 --gid omnitask --groups 1000 \
         --home-dir /app --shell /usr/sbin/nologin omnitask
 
 WORKDIR /app

@@ -174,6 +174,12 @@ python3 scripts/smoke-web.py http://localhost:5173
 
 The API smoke test covers health, authentication, CRUD, filtering, cross-user isolation and stale updates. The web smoke test checks the health endpoint and SPA fallback.
 
+## Deployment
+
+The repository includes a reproducible no-cost deployment path using Firebase Hosting, a Render Docker web service, and Aiven for MySQL. The Render Blueprint configures the API without storing credentials, and Firebase serves the compiled SPA from `frontend/dist`.
+
+See [deployment instructions](docs/deployment.md) for provider setup, secret handling, verification, free-plan limits, and the mobile release build command.
+
 GitHub Actions runs backend and frontend verification independently, builds both images, transfers those exact images to a final job, starts them against a fresh MySQL database and runs both smoke suites.
 
 ## Architecture
@@ -197,4 +203,4 @@ See [backend design decisions](docs/backend-design.md), [frontend architecture](
 - The API image runs as UID/GID 10001. The web image runs as UID/GID 101 and exposes a minimal `/healthz` endpoint.
 - Production deployments must provide HTTPS termination, managed secrets, access control, monitoring and backup procedures.
 
-Potential future scope includes refresh-token revocation, distributed login rate limits, password recovery, production mobile signing and cloud infrastructure. These are outside the implemented contract.
+Potential future scope includes refresh-token revocation, distributed login rate limits, password recovery, production mobile signing and paid production infrastructure. These are outside the implemented contract.
