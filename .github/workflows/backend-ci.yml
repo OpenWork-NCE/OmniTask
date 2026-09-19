@@ -1,4 +1,4 @@
-name: Backend CI
+name: OmniTask CI
 
 on:
   pull_request:
@@ -10,12 +10,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  group: omnitask-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify and build image
+  backend:
+    name: Verify backend and build image
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -36,22 +36,23 @@ jobs:
         working-directory: backend
         run: ./mvnw -B -ntp verify
 
-      - name: Build production image
+      - name: Build backend image
         run: docker build --tag "omnitask-api:${GITHUB_SHA}" backend
 
-      - name: Smoke test the packaged API
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          ./scripts/init-local-env.sh
-          compose=(docker compose -p omnitask-ci -f compose.yml -f compose.ci.yml)
-          trap '"${compose[@]}" down --volumes' EXIT
-          "${compose[@]}" up --no-build --wait --wait-timeout 120
-          python3 scripts/smoke-api.py http://localhost:18080
+      - name: Export backend image
+        run: docker save --output /tmp/omnitask-api.tar "omnitask-api:${GITHUB_SHA}"
 
-      - name: Upload verification reports
+      - name: Upload backend image
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-image
+          path: /tmp/omnitask-api.tar
+          retention-days: 1
+          compression-level: 0
+
+      - name: Upload backend reports
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: backend-verification
           path: |
@@ -61,3 +62,82 @@ jobs:
             backend/target/site/jacoco/
           retention-days: 7
           if-no-files-found: warn
+
+  frontend:
+    name: Verify frontend and build image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Verify frontend
+        working-directory: frontend
+        run: npm run check
+
+      - name: Build frontend image
+        run: docker build --tag "omnitask-web:${GITHUB_SHA}" frontend
+
+      - name: Export frontend image
+        run: docker save --output /tmp/omnitask-web.tar "omnitask-web:${GITHUB_SHA}"
+
+      - name: Upload frontend image
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: frontend-image
+          path: /tmp/omnitask-web.tar
+          retention-days: 1
+          compression-level: 0
+
+  smoke:
+    name: Smoke test packaged applications
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Download backend image
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: backend-image
+          path: /tmp/images
+
+      - name: Download frontend image
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: frontend-image
+          path: /tmp/images
+
+      - name: Load application images
+        run: |
+          docker load --input /tmp/images/omnitask-api.tar
+          docker load --input /tmp/images/omnitask-web.tar
+
+      - name: Smoke test packaged applications
+        env:
+          API_IMAGE_TAG: ${{ github.sha }}
+          WEB_IMAGE_TAG: ${{ github.sha }}
+        run: |
+          ./scripts/init-local-env.sh
+          compose=(docker compose -p omnitask-ci -f compose.yml -f compose.ci.yml)
+          trap '"${compose[@]}" down --volumes' EXIT
+          "${compose[@]}" up --no-build --wait --wait-timeout 120
+          python3 scripts/smoke-api.py http://localhost:18080
+          python3 scripts/smoke-web.py http://localhost:18081

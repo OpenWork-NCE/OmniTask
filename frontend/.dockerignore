@@ -1,0 +1,9 @@
+.env*
+dist/
+node_modules/
+npm-debug.log*
+playwright-report/
+test-results/
+.git/
+.gitignore
+README.md
