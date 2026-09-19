@@ -3,7 +3,8 @@ import { Check, ChevronDown, Plus, Search } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import matrixOverlay from "@/assets/overlays/matrix-light.svg";
+import matrixDark from "@/assets/overlays/matrix-dark.svg";
+import matrixLight from "@/assets/overlays/matrix-light.svg";
 
 import type { TaskStatus } from "../api/task-types";
 
@@ -48,8 +49,14 @@ export function TaskToolbar({
       <img
         aria-hidden
         alt=""
-        src={matrixOverlay}
-        className="absolute inset-0 -z-10 size-full object-cover opacity-[0.035] dark:invert"
+        src={matrixLight}
+        className="absolute inset-0 -z-10 size-full object-cover opacity-[0.035] dark:hidden"
+      />
+      <img
+        aria-hidden
+        alt=""
+        src={matrixDark}
+        className="absolute inset-0 -z-10 hidden size-full object-cover opacity-[0.045] dark:block"
       />
       <div className="grid gap-3 md:grid-cols-[minmax(16rem,1fr)_13rem_auto]">
         <label className="relative block">
