@@ -69,14 +69,28 @@ describe("login flow", () => {
     writeSession(validSession());
     server.use(
       http.get("http://localhost:8080/api/tasks", () =>
+        HttpResponse.json({
+          items: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0
+        })
+      )
+    );
+    renderApp("/app/tasks");
+    expect(
+      await screen.findByRole("heading", { name: "Move meaningful work forward" })
+    ).toBeVisible();
+
+    server.use(
+      http.get("http://localhost:8080/api/tasks", () =>
         HttpResponse.json(
           { status: 401, code: "UNAUTHENTICATED", detail: "Authentication is required" },
           { status: 401, headers: { "Content-Type": "application/problem+json" } }
         )
       )
     );
-    renderApp("/app/tasks");
-    expect(await screen.findByRole("heading", { name: "Tasks" })).toBeVisible();
 
     await request("/api/tasks").catch(() => undefined);
 

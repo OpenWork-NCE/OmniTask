@@ -19,9 +19,11 @@ export function TaskItem({ onDelete, onEdit, task }: TaskItemProps) {
   return (
     <article className="group grid gap-4 rounded-2xl border border-border/45 bg-surface p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-brand/45 hover:shadow-lg md:grid-cols-[minmax(0,1fr)_9rem_8rem_auto] md:items-center md:px-6">
       <div className="min-w-0">
-        <h2 className="truncate text-lg font-bold text-primary">{task.title}</h2>
+        <h2 className="text-lg font-bold text-primary [overflow-wrap:anywhere]">{task.title}</h2>
         {task.description ? (
-          <p className="mt-1 line-clamp-2 text-sm text-muted">{task.description}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted [overflow-wrap:anywhere]">
+            {task.description}
+          </p>
         ) : null}
       </div>
       <TaskStatusBadge status={task.status} />

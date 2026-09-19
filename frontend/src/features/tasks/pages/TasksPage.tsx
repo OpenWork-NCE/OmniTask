@@ -138,7 +138,7 @@ export function TasksPage() {
         <TaskToolbar
           search={query.q}
           status={query.status}
-          onSearchChange={(q) => updateQuery({ q, page: 0 }, true)}
+          onSearchChange={(q) => updateQuery({ q, page: 0 })}
           onStatusChange={changeStatus}
           onCreate={() => {
             setEditorError(null);
