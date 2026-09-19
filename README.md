@@ -1,37 +1,53 @@
 # OmniTask
 
-Java REST API for private task management. This repository currently contains the backend, its MySQL migrations, integration tests and delivery tooling. The web, Flutter and infrastructure directories are scaffolded in `frontend/`, `mobile/` and `infra/`; their feature implementations remain separate from the completed backend.
+OmniTask is a bilingual private task application. It combines a Spring Boot API, a React single-page application, MySQL schema migrations, automated verification and production-oriented container images.
+
+The web client provides registration, login, task search and status filtering, pagination, task creation and editing, confirmed deletion, optimistic concurrency recovery, English and French interfaces, and system/light/dark themes. Task ownership always comes from the authenticated JWT.
 
 ## Versions
 
-Spring Boot 4.1.1, Java 21, Maven Wrapper 3.3.4/Maven 3.9.11 and MySQL 8.4.11. Docker uses Temurin 21.0.12+8 and base images are fixed by digest; CI uses the same JDK version.
+- Java 21 and Spring Boot 4.1.1
+- Maven Wrapper 3.3.4 with Maven 3.9.11
+- MySQL 8.4.11
+- Node.js 24.19.x and npm 11.17.0
+- React 19.3.0, Vite 8.3.0, TypeScript 6.0.3 and Tailwind CSS 4.3.3
+
+Dependency and container versions are fixed. Production base images are also pinned by digest.
 
 ## Requirements
 
-- Docker Engine and Docker Compose 2.24.4 or newer, with permission to use the Docker daemon.
-- OpenSSL for generating local development secrets.
-- For host development: JDK 21, `unzip`, and either `curl` or `wget`. Maven Wrapper downloads and verifies Maven 3.9.11; a global Maven installation is not required.
-- Network access on the first build to retrieve dependencies and container images.
+- Docker Engine with Docker Compose 2.24.4 or newer
+- OpenSSL for local secret generation
+- Node.js 24.19.x and npm 11.17.x for frontend development
+- JDK 21 and `unzip` for backend development
+- Network access during the first dependency and image download
 
-## Run with Docker
+A global Maven installation is not required.
+
+## Run the complete application
 
 From the repository root:
 
 ```sh
 ./scripts/init-local-env.sh
 docker compose up --build --wait
-curl --fail http://localhost:8080/actuator/health/readiness
 ```
 
-The script creates random local database passwords and an RSA key pair. It preserves existing secrets. `.env` and `.secrets/` are ignored by Git. Do not copy placeholder passwords from `.env.example` into an existing `.env` and expect the script to replace them.
+Open `http://localhost:5173`. The API is available at `http://localhost:8080`, and MySQL is bound to `127.0.0.1:3306` for local diagnostics.
 
-The API binds to `127.0.0.1:8080`; MySQL binds to `127.0.0.1:3306`. Stop the services with `docker compose down`. Database data remains in the named volume. `docker compose down --volumes` irreversibly deletes that local database; use it only when intentionally resetting local data.
+The initialization script creates random database passwords and an RSA signing key pair. It preserves existing values. `.env` and `.secrets/` are excluded from Git.
 
-On Linux, `.secrets/` is mode 0700. Individual key files are readable by the non-root container after bind mounting; other host users cannot traverse the containing directory. Use a managed secret mount with appropriate permissions in a deployed environment.
+Stop the services without deleting data:
+
+```sh
+docker compose down
+```
+
+The `mysql-data` volume persists. `docker compose down --volumes` deletes the local database and should only be used for an intentional reset.
 
 ## Develop on the host
 
-Start only MySQL, then export the generated configuration:
+Start MySQL and the API:
 
 ```sh
 ./scripts/init-local-env.sh
@@ -45,92 +61,118 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-A corrected Temurin JDK was installed locally for this workspace under `.tools/jdk-21` (ignored by Git). To use it from the repository root, run `export JAVA_HOME="$PWD/.tools/jdk-21"` before entering `backend`. On another machine, install a supported JDK 21 and set `JAVA_HOME` normally.
+In another terminal, start the web client:
+
+```sh
+cd frontend
+npm ci
+npm run dev
+```
+
+Vite serves the client on `http://localhost:5173` and calls the API at `http://localhost:8080`. Copy `frontend/.env.example` to `frontend/.env.local` only when a different API origin is required.
+
+This workspace also contains a local Temurin JDK at `.tools/jdk-21`, which is ignored by Git. On another machine, install JDK 21 and set `JAVA_HOME` normally.
 
 ## Configuration
 
-| Variable | Meaning | Default |
-| --- | --- | --- |
-| `DB_URL` | JDBC URL | Local MySQL database `omnitask`, UTC session |
-| `DB_USERNAME` | Application database user | `omnitask` |
-| `DB_PASSWORD` | Database password | Required |
-| `DB_POOL_SIZE` | Maximum connections per API instance | `5` |
-| `JWT_PRIVATE_KEY` | PKCS#8 RSA private key resource, normally `file:/...` | Required |
-| `JWT_PUBLIC_KEY` | X.509 RSA public key resource | Required |
-| `JWT_ISSUER` | Required issuer claim | `omnitask` |
-| `JWT_AUDIENCE` | Required audience claim | `omnitask-api` |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated explicit origins | `http://localhost:5173` |
-| `PORT` | HTTP port | `8080` |
+### API and Compose
 
-JWT lifetime is 15 minutes. The application validates configured lifetimes between 1 and 30 minutes. Never commit private keys, passwords, access tokens or environment files. HTTPS termination, deployment access control and secret provisioning are the operator's responsibility.
+| Variable               | Meaning                                            | Default                                      |
+| ---------------------- | -------------------------------------------------- | -------------------------------------------- |
+| `DB_URL`               | JDBC URL                                           | Local `omnitask` database with a UTC session |
+| `DB_USERNAME`          | Application database user                          | `omnitask`                                   |
+| `DB_PASSWORD`          | Application database password                      | Required                                     |
+| `DB_POOL_SIZE`         | Maximum connections per API instance               | `5`                                          |
+| `JWT_PRIVATE_KEY`      | PKCS#8 RSA private key resource                    | Required                                     |
+| `JWT_PUBLIC_KEY`       | X.509 RSA public key resource                      | Required                                     |
+| `JWT_ISSUER`           | Required JWT issuer                                | `omnitask`                                   |
+| `JWT_AUDIENCE`         | Required JWT audience                              | `omnitask-api`                               |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated explicit web origins               | `http://localhost:5173`                      |
+| `PORT`                 | Host API port in Compose                           | `8080`                                       |
+| `WEB_PORT`             | Host web port in Compose                           | `5173`                                       |
+| `WEB_API_BASE_URL`     | API origin compiled into the production web bundle | `http://localhost:8080`                      |
 
-## API
+### Frontend
 
-See [the API contract](docs/api/README.md) for complete constraints, requests, responses, error codes, pagination and concurrency behavior.
+`VITE_API_BASE_URL` is validated as a URL when the client is built. Because Vite embeds this value in the static bundle, build a new image when the public API origin changes.
 
-| Method | Path | Authentication |
-| --- | --- | --- |
-| POST | `/api/auth/register` | Public |
-| POST | `/api/auth/login` | Public |
-| GET | `/api/tasks` | Bearer JWT |
-| POST | `/api/tasks` | Bearer JWT |
-| PUT | `/api/tasks/{id}` | Bearer JWT |
-| DELETE | `/api/tasks/{id}` | Bearer JWT |
+Locale and theme preferences are stored locally. The access token is held in memory and `sessionStorage`, so closing the browser session signs the user out. It is never stored in `localStorage`.
 
-Example registration:
+## API contract
 
-```sh
-curl --request POST http://localhost:8080/api/auth/register \
-  --header 'Content-Type: application/json' \
-  --data '{"email":"alex@example.com","password":"An example passphrase!"}'
-```
+The complete request constraints, Problem Details responses, pagination and concurrency behavior are documented in [docs/api/README.md](docs/api/README.md).
 
-Login returns an `accessToken`; send it using `Authorization: Bearer <accessToken>`. Task owners come exclusively from the authenticated identity. Cross-user mutations return the same 404 as missing resources. PUT requires the version from the last task response; stale updates return 409.
+| Method   | Path                 | Authentication |
+| -------- | -------------------- | -------------- |
+| `POST`   | `/api/auth/register` | Public         |
+| `POST`   | `/api/auth/login`    | Public         |
+| `GET`    | `/api/tasks`         | Bearer JWT     |
+| `POST`   | `/api/tasks`         | Bearer JWT     |
+| `PUT`    | `/api/tasks/{id}`    | Bearer JWT     |
+| `DELETE` | `/api/tasks/{id}`    | Bearer JWT     |
+
+Task owners come exclusively from the authenticated identity. Cross-user access returns the same 404 response as a missing resource. Updates include the last observed version; stale writes return 409 and the web editor preserves the draft for explicit recovery.
 
 ## Verification
 
+Backend verification uses a real MySQL instance through Testcontainers:
+
 ```sh
 cd backend
-./mvnw -B -ntp clean verify
+./mvnw -B -ntp verify
 ```
 
-Docker is mandatory for integration tests. Testcontainers creates an isolated real MySQL database, runs Flyway migrations and removes its containers afterward. No development database or external API is needed. A missing Docker daemon fails verification rather than skipping tests.
+This lifecycle checks formatting and the toolchain, runs unit and integration tests, packages the API, runs SpotBugs and produces a JaCoCo report. Docker is required and missing Docker fails the build.
 
-`verify` runs format checks, toolchain enforcement, unit tests when present, compilation, packaging, HTTP/persistence integration tests, SpotBugs and a JaCoCo report. `test` alone does not run the `*IT` integration suite. Run `./mvnw spotless:apply` to apply the shared Java format.
+Frontend verification:
 
-Reports are written to `backend/target/failsafe-reports/`, `backend/target/spotbugsXml.xml` and `backend/target/site/jacoco/index.html`. Coverage is diagnostic, not a claim that every risk is covered.
+```sh
+cd frontend
+npm ci
+npm run check
+```
 
-After starting the API, run `python3 scripts/smoke-api.py` from the repository root for an actual HTTP smoke check. It creates two test accounts, exercises ownership and conflicts, and deletes its task; the accounts remain in that database.
+`check` runs Prettier verification, ESLint with zero warnings, strict TypeScript, 22 focused Vitest tests and a production Vite build.
 
-There is one narrow SpotBugs exclusion for retaining a constructor-injected Spring transactional service in `TaskController`. Copying the service would bypass its proxy. Other findings remain blocking.
+With the API and MySQL running, execute the four Chromium journeys:
 
-GitHub Actions runs the same Maven lifecycle, builds the image, then boots it against a fresh Compose database and runs the HTTP smoke check. `compose.ci.yml` isolates that check from the host MySQL port. Test reports are retained as CI artifacts.
+```sh
+cd frontend
+npm run e2e
+```
 
-## Architecture and dependencies
+The journeys cover registration and first-task creation on mobile, editing and filtering on desktop, literal search history, and French dark mode at 320 px with a 200 percent root font size.
 
-The backend is a feature-organized monolith: `auth`, `users`, `tasks`, `security` and `http`. Controllers handle HTTP; services own transactions and authorization; repositories perform persistence. Input records, response records and JPA entities are separate. There are no generic service/repository wrappers or generated mapping layers.
+Packaged smoke checks:
 
-Spring Boot's pinned dependency BOM manages Spring, Hibernate, Jackson, Flyway, MySQL JDBC and Testcontainers versions. Direct build plugins and the Maven distribution are pinned. Bouncy Castle is present specifically for Spring Security's scrypt implementation. API documentation is maintained as a concrete contract without adding a runtime documentation dependency.
+```sh
+python3 scripts/smoke-api.py http://localhost:8080
+python3 scripts/smoke-web.py http://localhost:5173
+```
 
-Flyway owns schema changes; Hibernate validates them. Open Session in View is disabled. Task ownership is represented by a scalar UUID with a database foreign key, avoiding implicit association loading. Composite indexes match owner/status filtering and ordering; substring searches still scan the matching user's rows. No full-text performance claim is made.
+The API smoke test covers health, authentication, CRUD, filtering, cross-user isolation and stale updates. The web smoke test checks the health endpoint and SPA fallback.
 
-See [design decisions](docs/backend-design.md) and [contribution conventions](CONTRIBUTING.md).
+GitHub Actions runs backend and frontend verification independently, builds both images, transfers those exact images to a final job, starts them against a fresh MySQL database and runs both smoke suites.
 
-## Client and infrastructure skeleton
+## Architecture
 
-- [Web structure](frontend/README.md) follows React/Vite/TypeScript feature boundaries.
-- [Mobile structure](mobile/README.md) follows Flutter feature boundaries and the shared API contract.
-- [Infrastructure structure](infra/README.md) reserves Docker, GCP and Terraform concerns.
-- [UI architecture](docs/ui/README.md) and [client folder decision](docs/adr/0001-client-folder-structure.md) define the shared boundaries.
+The backend is a feature-organized monolith with `auth`, `users`, `tasks`, `security` and `http` packages. Controllers own HTTP concerns, services own application rules and transaction boundaries, and repositories own persistence. Input DTOs, output DTOs and JPA entities remain separate.
+
+The frontend follows the same feature ownership. Authentication owns credentials, session state and route guards. Tasks own API types, URL query state, validation and task interactions. Shared components contain presentation primitives; shared libraries contain HTTP, localization, configuration and theme behavior. TanStack Query owns server state.
+
+Flyway owns database changes and Hibernate validates the schema. Open Session in View is disabled. Composite indexes match owner/status filtering and ordering; substring search remains scoped to a user's rows without a full-text performance claim.
+
+See [backend design decisions](docs/backend-design.md), [frontend architecture](frontend/README.md), [UI asset usage](docs/ui/web-asset-usage.md) and [contribution conventions](CONTRIBUTING.md).
 
 ## Security and operational boundaries
 
-- Only explicitly supplied Bearer headers authenticate requests; no cookies or server sessions. CSRF is disabled for this transport. Adding cookie authentication requires changing that decision and its tests.
-- CORS uses an explicit allowlist without credentialed browser requests.
-- JWT verification restricts the algorithm to RS256 and validates signature, issuer, audience, timestamps and subject format. Access tokens contain user IDs, not passwords or email addresses.
-- Logout means client-side token disposal. There is no refresh endpoint or per-token revocation; an already issued token remains valid until expiration.
-- Errors use sanitized Problem Details, including authentication failures and firewall rejections. Correlation IDs connect responses to logs. Low-level Hibernate SQL error logging is disabled because database messages may contain rejected email addresses.
-- Health endpoints expose status only. Readiness checks MySQL; liveness does not. Other actuator endpoints are not exposed.
-- The image runs as UID/GID 10001. Migrations currently execute during startup using the application database account. A deployment with separate migration credentials/job is a future operational enhancement.
+- The API accepts explicit Bearer headers and does not use authentication cookies or server sessions. CSRF is disabled for this transport.
+- CORS uses explicit origins and does not allow credentialed browser requests.
+- JWT validation restricts signatures to RS256 and validates issuer, audience, timestamps and subject format.
+- Access tokens expire after 15 minutes. Logout removes the client token. There is no refresh endpoint or per-token revocation.
+- Error responses are sanitized Problem Details. Correlation IDs connect responses to logs without returning stack traces or SQL details.
+- Readiness checks MySQL; liveness does not. Other actuator endpoints are not exposed.
+- The API image runs as UID/GID 10001. The web image runs as UID/GID 101 and exposes a minimal `/healthz` endpoint.
+- Production deployments must provide HTTPS termination, managed secrets, access control, monitoring and backup procedures.
 
-Optional follow-up work, not implemented: refresh sessions and revocation, distributed login rate limits, email verification/password recovery, web/mobile clients, GCP infrastructure, managed backups/restore drills and production monitoring. Public Internet deployment should include a deliberate abuse-control policy.
+Potential future scope includes refresh-token revocation, distributed login rate limits, password recovery, the Flutter client and cloud infrastructure. These are outside the implemented contract.
