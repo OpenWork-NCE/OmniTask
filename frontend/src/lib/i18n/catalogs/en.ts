@@ -74,8 +74,8 @@ export const en = {
       label: "Search tasks",
       placeholder: "Search by title or description"
     },
-    count: "{{count}} task",
-    count_other: "{{count}} tasks"
+    count: "{{formattedCount}} task",
+    count_other: "{{formattedCount}} tasks"
   },
   status: {
     label: "Task status",

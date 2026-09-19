@@ -11,3 +11,7 @@ export const DeferredRegisterPage = lazy(() =>
 export const DeferredNotFoundPage = lazy(() =>
   import("./NotFoundPage").then((module) => ({ default: module.NotFoundPage }))
 );
+
+export const DeferredTasksPage = lazy(() =>
+  import("@/features/tasks/pages/TasksPage").then((module) => ({ default: module.TasksPage }))
+);

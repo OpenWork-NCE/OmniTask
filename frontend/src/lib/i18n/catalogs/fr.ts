@@ -76,8 +76,8 @@ export const fr = {
       label: "Rechercher des tâches",
       placeholder: "Rechercher par titre ou description"
     },
-    count: "{{count}} tâche",
-    count_other: "{{count}} tâches"
+    count: "{{formattedCount}} tâche",
+    count_other: "{{formattedCount}} tâches"
   },
   status: {
     label: "Statut de la tâche",
