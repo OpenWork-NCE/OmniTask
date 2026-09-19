@@ -1,6 +1,6 @@
 # Backend design
 
-The backend implements the recruitment specification's six endpoints with Java 21, Spring Boot, Spring Security, Spring Data JPA and MySQL. It is a feature-organized monolith. Controllers own HTTP, services own transactions and authorization, repositories own persistence. Entities never cross the HTTP boundary.
+The backend implements the product's six endpoints with Java 21, Spring Boot, Spring Security, Spring Data JPA and MySQL. It is a feature-organized monolith. Controllers own HTTP, services own transactions and authorization, repositories own persistence. Entities never cross the HTTP boundary.
 
 ## Contract decisions
 

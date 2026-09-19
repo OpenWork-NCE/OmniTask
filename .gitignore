@@ -2,7 +2,13 @@
 /.tools/
 /.env
 /.secrets/
+/.firebase/
+/docs/superpowers/
+/docs/ui/OmniTask-Abstract-Graphics/
+/docs/ui/OmniTask-Brand-Kit/
+/docs/ui/OmniTask-Guide.pdf
 *.log
+firebase-debug.log
 __pycache__/
 .idea/
 .vscode/

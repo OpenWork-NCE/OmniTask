@@ -1,6 +1,6 @@
 # Web asset usage
 
-The shipped web assets are a focused subset of the supplied OmniTask identity system. Source files remain in `docs/ui`; runtime copies live under `frontend/src/assets` or `frontend/public`.
+The shipped web assets are a focused subset of the OmniTask identity system. Versioned runtime files live under `frontend/src/assets` or `frontend/public`; the larger source kit stays outside the repository.
 
 | Runtime asset                           | Source family                 | Use                                               |
 | --------------------------------------- | ----------------------------- | ------------------------------------------------- |
