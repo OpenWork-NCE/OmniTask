@@ -16,3 +16,5 @@ The web and mobile clients share the same API contract but keep platform-specifi
 - Feature services coordinate API calls and domain rules.
 - Network and token storage stay in platform infrastructure layers.
 - Reusable visual primitives do not perform network calls.
+
+Asset selection and motion rules are recorded in [web asset usage](web-asset-usage.md) and [mobile asset usage](mobile-asset-usage.md).

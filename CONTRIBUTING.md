@@ -56,6 +56,27 @@ Build the production image separately:
 docker build -t omnitask-api:local backend
 ```
 
+## Mobile development
+
+Use Flutter 3.47.5 stable with Dart 3.13.4. Start the API, then run:
+
+```sh
+cd mobile
+flutter pub get
+flutter run
+```
+
+Verify mobile changes before committing:
+
+```sh
+dart format --output=none --set-exit-if-changed lib test integration_test
+flutter analyze
+flutter test
+flutter build apk --debug
+```
+
+Configure another API origin with `--dart-define=API_BASE_URL=https://api.example.com`. Never commit mobile signing keys, provisioning profiles or access tokens.
+
 ## Commit messages
 
 Use Conventional Commits in the form `type(scope): description`. Write the

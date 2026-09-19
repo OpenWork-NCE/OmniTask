@@ -1,8 +1,8 @@
 # OmniTask
 
-OmniTask is a bilingual private task application. It combines a Spring Boot API, a React single-page application, MySQL schema migrations, automated verification and production-oriented container images.
+OmniTask is a bilingual private task application. It combines a Spring Boot API, React and Flutter clients, MySQL schema migrations, automated verification and production-oriented web and API container images.
 
-The web client provides registration, login, task search and status filtering, pagination, task creation and editing, confirmed deletion, optimistic concurrency recovery, English and French interfaces, and system/light/dark themes. Task ownership always comes from the authenticated JWT.
+The web and mobile clients provide registration, login, task search and status filtering, pagination, task creation and editing, confirmed deletion, optimistic concurrency recovery, English and French interfaces, and system/light/dark themes. Task ownership always comes from the authenticated JWT.
 
 ## Versions
 
@@ -11,6 +11,7 @@ The web client provides registration, login, task search and status filtering, p
 - MySQL 8.4.11
 - Node.js 24.19.x and npm 11.17.0
 - React 19.3.0, Vite 8.3.0, TypeScript 6.0.3, Tailwind CSS 4.3.3 and Framer Motion 13.4.0
+- Flutter 3.47.5 stable and Dart 3.13.4
 
 Dependency and container versions are fixed. Production base images are also pinned by digest.
 
@@ -20,6 +21,7 @@ Dependency and container versions are fixed. Production base images are also pin
 - OpenSSL for local secret generation
 - Node.js 24.19.x and npm 11.17.x for frontend development
 - JDK 21 and `unzip` for backend development
+- Flutter 3.47.5 and an Android API 36 toolchain for mobile development
 - Network access during the first dependency and image download
 
 A global Maven installation is not required.
@@ -70,6 +72,16 @@ npm run dev
 ```
 
 Vite serves the client on `http://localhost:5173` and calls the API at `http://localhost:8080`. Copy `frontend/.env.example` to `frontend/.env.local` only when a different API origin is required.
+
+Run the mobile client from an Android emulator:
+
+```sh
+cd mobile
+flutter pub get
+flutter run
+```
+
+Android emulators use `http://10.0.2.2:8080` by default. Pass `--dart-define=API_BASE_URL=https://api.example.com` for a physical device or deployed API. See [mobile setup and architecture](mobile/README.md).
 
 This workspace also contains a local Temurin JDK at `.tools/jdk-21`, which is ignored by Git. On another machine, install JDK 21 and set `JAVA_HOME` normally.
 
@@ -132,7 +144,7 @@ npm ci
 npm run check
 ```
 
-`check` runs Prettier verification, ESLint with zero warnings, strict TypeScript, 22 focused Vitest tests and a production Vite build.
+`check` runs Prettier verification, ESLint with zero warnings, strict TypeScript, 23 focused Vitest tests and a production Vite build.
 
 With the API and MySQL running, execute the four Chromium journeys:
 
@@ -142,6 +154,16 @@ npm run e2e
 ```
 
 The journeys cover registration and first-task creation on mobile, editing and filtering on desktop, literal search history, and French dark mode at 320 px with a 200 percent root font size.
+
+Mobile verification:
+
+```sh
+cd mobile
+dart format --output=none --set-exit-if-changed lib test integration_test
+flutter analyze
+flutter test
+flutter build apk --debug
+```
 
 Packaged smoke checks:
 
@@ -158,7 +180,7 @@ GitHub Actions runs backend and frontend verification independently, builds both
 
 The backend is a feature-organized monolith with `auth`, `users`, `tasks`, `security` and `http` packages. Controllers own HTTP concerns, services own application rules and transaction boundaries, and repositories own persistence. Input DTOs, output DTOs and JPA entities remain separate.
 
-The frontend follows the same feature ownership. Authentication owns credentials, session state and route guards. Tasks own API types, URL query state, validation and task interactions. Shared components contain presentation primitives; shared libraries contain HTTP, localization, configuration and theme behavior. TanStack Query owns server state.
+Both clients follow the same feature ownership. Authentication owns credentials and session state. Tasks own API types, validation and task interactions. Shared code is limited to cross-feature configuration, networking, storage, localization, themes and presentation primitives. TanStack Query owns web server state; focused Flutter controllers own mobile screen state.
 
 Flyway owns database changes and Hibernate validates the schema. Open Session in View is disabled. Composite indexes match owner/status filtering and ordering; substring search remains scoped to a user's rows without a full-text performance claim.
 
@@ -175,4 +197,4 @@ See [backend design decisions](docs/backend-design.md), [frontend architecture](
 - The API image runs as UID/GID 10001. The web image runs as UID/GID 101 and exposes a minimal `/healthz` endpoint.
 - Production deployments must provide HTTPS termination, managed secrets, access control, monitoring and backup procedures.
 
-Potential future scope includes refresh-token revocation, distributed login rate limits, password recovery, the Flutter client and cloud infrastructure. These are outside the implemented contract.
+Potential future scope includes refresh-token revocation, distributed login rate limits, password recovery, production mobile signing and cloud infrastructure. These are outside the implemented contract.
