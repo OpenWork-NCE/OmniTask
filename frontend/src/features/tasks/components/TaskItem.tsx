@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +18,16 @@ export function TaskItem({ onDelete, onEdit, task }: TaskItemProps) {
   }).format(new Date(task.updatedAt));
 
   return (
-    <article className="group grid gap-4 rounded-2xl border border-border/45 bg-surface p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-brand/45 hover:shadow-lg md:grid-cols-[minmax(0,1fr)_9rem_8rem_auto] md:items-center md:px-6">
+    <motion.article
+      className="group grid gap-4 rounded-2xl border border-border/45 bg-surface p-5 shadow-sm transition-colors duration-200 hover:border-brand/45 md:grid-cols-[minmax(0,1fr)_9rem_8rem_auto] md:items-center md:px-6"
+      layout
+      transition={{ layout: { duration: 0.28, ease: [0.16, 1, 0.3, 1] } }}
+      variants={{
+        hidden: { opacity: 0, y: 12, scale: 0.99 },
+        visible: { opacity: 1, y: 0, scale: 1 }
+      }}
+      whileHover={{ y: -2, boxShadow: "0 16px 38px rgb(11 13 18 / 0.1)" }}
+    >
       <div className="min-w-0">
         <h2 className="text-lg font-bold text-primary [overflow-wrap:anywhere]">{task.title}</h2>
         {task.description ? (
@@ -31,23 +41,27 @@ export function TaskItem({ onDelete, onEdit, task }: TaskItemProps) {
         {updatedAt}
       </time>
       <div className="flex items-center gap-2 md:justify-end">
-        <button
+        <motion.button
           aria-label={t("tasks.actions.editNamed", { title: task.title })}
           className="grid size-11 place-items-center rounded-xl border border-border/60 text-muted transition hover:border-brand hover:bg-elevated hover:text-primary"
           onClick={() => onEdit(task)}
           type="button"
+          whileHover={{ rotate: -4, scale: 1.04 }}
+          whileTap={{ scale: 0.92 }}
         >
           <Pencil aria-hidden className="size-4.5" strokeWidth={1.75} />
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           aria-label={t("tasks.actions.deleteNamed", { title: task.title })}
           className="grid size-11 place-items-center rounded-xl border border-border/60 text-muted transition hover:border-danger hover:bg-danger/10 hover:text-danger"
           onClick={() => onDelete(task)}
           type="button"
+          whileHover={{ rotate: 4, scale: 1.04 }}
+          whileTap={{ scale: 0.92 }}
         >
           <Trash2 aria-hidden className="size-4.5" strokeWidth={1.75} />
-        </button>
+        </motion.button>
       </div>
-    </article>
+    </motion.article>
   );
 }

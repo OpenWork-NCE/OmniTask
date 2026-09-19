@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { CircleCheck, CircleDashed, Timer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -20,11 +21,15 @@ export function TaskStatusBadge({ status }: Readonly<{ status: TaskStatus }>) {
   const { t } = useTranslation();
   const Icon = icons[status];
   return (
-    <span
+    <motion.span
+      layout
       className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${styles[status]}`}
+      initial={{ opacity: 0, scale: 0.94 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
     >
       <Icon aria-hidden className="size-3.5" />
       {t(labels[status])}
-    </span>
+    </motion.span>
   );
 }

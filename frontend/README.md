@@ -63,7 +63,9 @@ An inline bootstrap resolves the saved or system theme before React starts, prev
 
 The layout starts at 320 px. Tailwind's 640 px, 768 px and 1024 px breakpoints progressively add space and columns. Primary actions remain visible at narrow widths, user content can wrap, dialogs cap their viewport height, controls meet a 44 px minimum target, and reduced-motion preferences disable nonessential motion.
 
-Headless UI supplies Dialog, Menu and Listbox behavior. Radix UI is limited to toast announcements. Lucide supplies interface icons. React Hook Form and Zod keep form state and client constraints aligned. These dependencies each own a concrete concern and are pinned exactly.
+Framer Motion coordinates page entrances, staggered task rendering, layout changes, dialog presentation, button feedback and slow abstract-overlay movement. Ambient loops run for 12 to 20 seconds; interaction feedback stays between 160 and 550 ms. A global motion policy and explicit reduced-motion checks stop continuous decorative movement when the operating system requests reduced motion.
+
+Headless UI supplies Dialog, Menu and Listbox behavior. Radix UI is limited to toast announcements. Lucide supplies interface icons. React Hook Form and Zod keep form state and client constraints aligned. Framer Motion owns animation timing and reduced-motion behavior. These dependencies each own a concrete concern and are pinned exactly.
 
 ## Tests
 

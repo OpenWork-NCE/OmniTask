@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -112,9 +113,14 @@ export function TasksPage() {
     <AppShell>
       <main
         id="main-content"
-        className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 sm:py-12 lg:px-8"
+        className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 sm:py-12 lg:px-8"
       >
-        <header className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+        <motion.header
+          animate={{ opacity: 1, y: 0 }}
+          className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end"
+          initial={{ opacity: 0, y: 16 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div className="max-w-3xl">
             <p className="text-sm font-extrabold tracking-[0.15em] text-brand uppercase">
               {t("tasks.eyebrow")}
@@ -134,7 +140,7 @@ export function TasksPage() {
               })}
             </p>
           ) : null}
-        </header>
+        </motion.header>
         <TaskToolbar
           search={query.q}
           status={query.status}

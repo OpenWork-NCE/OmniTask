@@ -1,9 +1,11 @@
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
-import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { forwardRef, type ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "danger";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonProps = Omit<HTMLMotionProps<"button">, "children" | "ref"> & {
+  children?: ReactNode;
   variant?: ButtonVariant;
   pending?: boolean;
 };
@@ -19,14 +21,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref
 ) {
   return (
-    <button
+    <motion.button
       ref={ref}
       className={`relative inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-bold transition duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`}
       disabled={pending ? true : disabled}
+      whileHover={pending || disabled ? {} : { y: -1 }}
+      whileTap={pending || disabled ? {} : { scale: 0.98 }}
+      transition={{ duration: 0.16, ease: "easeOut" }}
       {...props}
     >
       {pending ? <LoaderCircle aria-hidden className="size-5 animate-spin" /> : null}
       <span>{children}</span>
-    </button>
+    </motion.button>
   );
 });

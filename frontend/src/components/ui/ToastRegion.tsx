@@ -11,7 +11,7 @@ export function ToastRegion({ message, onDismiss }: ToastRegionProps) {
   const { t } = useTranslation();
   return (
     <Toast.Root
-      className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-border/50 bg-surface p-4 text-primary shadow-2xl data-[state=closed]:animate-[fade-out_150ms_ease-in] data-[state=open]:animate-[toast-in_200ms_ease-out]"
+      className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-border/50 bg-surface p-4 text-primary shadow-2xl data-[state=closed]:animate-[toast-out_150ms_ease-in_forwards] data-[state=open]:animate-[toast-in_200ms_ease-out]"
       duration={4_000}
       onOpenChange={(open) => {
         if (!open) onDismiss();
@@ -23,6 +23,8 @@ export function ToastRegion({ message, onDismiss }: ToastRegionProps) {
       <Toast.Close
         aria-label={t("accessibility.close")}
         className="grid size-9 place-items-center rounded-lg text-muted hover:bg-elevated hover:text-primary"
+        onClick={onDismiss}
+        type="button"
       >
         <X aria-hidden className="size-4" />
       </Toast.Close>

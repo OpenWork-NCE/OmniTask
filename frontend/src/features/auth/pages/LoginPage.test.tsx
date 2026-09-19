@@ -48,14 +48,15 @@ describe("login flow", () => {
     await user.click(await screen.findByRole("button", { name: "Se connecter" }));
 
     expect(screen.getByLabelText("Adresse e-mail")).toHaveFocus();
-    expect(screen.getByText("Saisissez votre adresse e-mail.")).toBeVisible();
+    await waitFor(() => expect(screen.getByText("Saisissez votre adresse e-mail.")).toBeVisible());
   });
 
   it("returns to the protected destination after login", async () => {
     const user = userEvent.setup();
     const router = renderApp("/app/tasks?q=report");
 
-    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeVisible();
+    const heading = await screen.findByRole("heading", { name: "Sign in" });
+    await waitFor(() => expect(heading).toBeVisible());
     await user.type(screen.getByLabelText("Email address"), "alex@example.com");
     await user.type(screen.getByLabelText("Password"), "a-strong-password");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
@@ -79,9 +80,10 @@ describe("login flow", () => {
       )
     );
     renderApp("/app/tasks");
-    expect(
-      await screen.findByRole("heading", { name: "Move meaningful work forward" })
-    ).toBeVisible();
+    const tasksHeading = await screen.findByRole("heading", {
+      name: "Move meaningful work forward"
+    });
+    await waitFor(() => expect(tasksHeading).toBeVisible());
 
     server.use(
       http.get("http://localhost:8080/api/tasks", () =>
@@ -94,8 +96,9 @@ describe("login flow", () => {
 
     await request("/api/tasks").catch(() => undefined);
 
-    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeVisible();
-    expect(screen.getByText("Your session has expired")).toBeVisible();
+    const loginHeading = await screen.findByRole("heading", { name: "Sign in" });
+    await waitFor(() => expect(loginHeading).toBeVisible());
+    await waitFor(() => expect(screen.getByText("Your session has expired")).toBeVisible());
     expect(readSession()).toBeNull();
   });
 });

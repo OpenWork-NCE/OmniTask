@@ -1,4 +1,5 @@
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, Plus, Search } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,11 +33,16 @@ export function TaskToolbar({
   status
 }: TaskToolbarProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  const searchInput = useRef<HTMLInputElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
     clearTimeout(timer.current);
+    if (searchInput.current && searchInput.current.value !== search) {
+      searchInput.current.value = search;
+    }
   }, [search]);
 
   function debounceSearch(value: string) {
@@ -45,18 +51,27 @@ export function TaskToolbar({
   }
 
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-border/40 bg-surface p-4 shadow-sm sm:p-5">
-      <img
+    <motion.section
+      animate={{ opacity: 1, y: 0 }}
+      className="relative isolate overflow-hidden rounded-3xl border border-border/40 bg-surface p-4 shadow-sm sm:p-5"
+      initial={{ opacity: 0, y: 14 }}
+      transition={{ delay: 0.08, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <motion.img
         aria-hidden
         alt=""
+        animate={reduceMotion ? {} : { scale: [1, 1.025, 1], x: [0, 6, 0] }}
         src={matrixLight}
         className="absolute inset-0 -z-10 size-full object-cover opacity-[0.035] dark:hidden"
+        transition={{ duration: 16, ease: "easeInOut", repeat: Infinity }}
       />
-      <img
+      <motion.img
         aria-hidden
         alt=""
+        animate={reduceMotion ? {} : { scale: [1, 1.025, 1], x: [0, 6, 0] }}
         src={matrixDark}
         className="absolute inset-0 -z-10 hidden size-full object-cover opacity-[0.045] dark:block"
+        transition={{ duration: 16, ease: "easeInOut", repeat: Infinity }}
       />
       <div className="grid gap-3 md:grid-cols-[minmax(16rem,1fr)_13rem_auto]">
         <label className="relative block">
@@ -66,7 +81,7 @@ export function TaskToolbar({
             className="absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted"
           />
           <input
-            key={search}
+            ref={searchInput}
             className="min-h-12 w-full rounded-xl border border-border bg-surface/95 pr-4 pl-12 text-primary shadow-sm placeholder:text-muted/70 focus:border-brand"
             defaultValue={search}
             maxLength={200}
@@ -107,16 +122,18 @@ export function TaskToolbar({
           </div>
         </Listbox>
         {onCreate ? (
-          <button
+          <motion.button
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-5 font-bold text-on-brand shadow-lg transition hover:brightness-110"
             onClick={onCreate}
             type="button"
+            whileHover={{ y: -1, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
           >
             <Plus aria-hidden className="size-5" />
             {t("tasks.actions.create")}
-          </button>
+          </motion.button>
         ) : null}
       </div>
-    </section>
+    </motion.section>
   );
 }

@@ -1,9 +1,11 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { motion } from "framer-motion";
 import { LogOut, UserRound } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useSession } from "@/features/auth/session/session-context";
+import { AbstractMotionLayer } from "@/components/motion/AbstractMotionLayer";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { LocaleMenu } from "@/components/ui/LocaleMenu";
 import { ThemeMenu } from "@/components/ui/ThemeMenu";
@@ -13,10 +15,16 @@ export function AppShell({ children }: PropsWithChildren) {
   const { logout } = useSession();
   return (
     <div className="app-shell min-h-dvh bg-canvas text-primary">
+      <AbstractMotionLayer variant="matrix" />
       <a className="skip-link" href="#main-content">
         {t("accessibility.skipToContent")}
       </a>
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-surface/90 backdrop-blur-xl">
+      <motion.header
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-30 border-b border-border/40 bg-surface/90 backdrop-blur-xl"
+        initial={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      >
         <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <BrandLogo className="w-40 sm:w-48" />
           <div className="flex items-center gap-2">
@@ -47,7 +55,7 @@ export function AppShell({ children }: PropsWithChildren) {
             </Menu>
           </div>
         </div>
-      </header>
+      </motion.header>
       {children}
     </div>
   );

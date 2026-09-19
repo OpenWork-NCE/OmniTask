@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { App } from "./App";
@@ -8,6 +8,7 @@ describe("App", () => {
     window.history.replaceState({}, "", "/");
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeVisible();
+    const heading = await screen.findByRole("heading", { name: "Sign in" });
+    await waitFor(() => expect(heading).toBeVisible());
   });
 });

@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
@@ -64,7 +64,8 @@ describe("task workspace", () => {
 
     renderTasks("/app/tasks?status=DONE&q=report&page=1&size=20");
 
-    expect(await screen.findByDisplayValue("report")).toBeVisible();
+    const search = await screen.findByDisplayValue("report");
+    await waitFor(() => expect(search).toBeVisible());
     expect(screen.getByRole("button", { name: /Done/ })).toBeVisible();
     expect(await screen.findByText("24 tasks")).toBeVisible();
     expect(screen.getByText("Publish quarterly report")).toBeVisible();

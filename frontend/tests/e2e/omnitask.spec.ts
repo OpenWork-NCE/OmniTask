@@ -23,6 +23,9 @@ test("registers and creates the first task on mobile", async ({ page }) => {
   await createTask(page, "Prepare mobile review");
 
   await expect(page.getByText("Prepare mobile review", { exact: true })).toBeVisible();
+  const notificationClose = page.getByRole("button", { name: "Close" });
+  await expect(notificationClose).toBeVisible();
+  await expect(notificationClose).toBeHidden({ timeout: 6_000 });
   expect(
     await page.locator("html").evaluate((element) => element.scrollWidth <= element.clientWidth)
   ).toBe(true);
@@ -38,6 +41,8 @@ test("edits and filters tasks on desktop", async ({ page, request }) => {
   await page.getByLabel("Status", { exact: true }).selectOption("DONE");
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText("Task updated")).toBeVisible();
+  await page.getByRole("button", { name: "Close" }).click();
+  await expect(page.getByText("Task updated")).toBeHidden();
   await page.getByRole("button", { name: /Task status/ }).click();
   await page.getByRole("option", { name: "Done" }).click();
 
@@ -52,6 +57,9 @@ test("browser back restores literal search text", async ({ page, request }) => {
 
   await search.fill("50%_café");
   await expect(page).toHaveURL(/q=50%25_caf%C3%A9/);
+  await search.press("Backspace");
+  await expect(page).toHaveURL(/q=50%25_caf/);
+  await expect(search).toBeFocused();
   await search.fill("second search");
   await expect(page).toHaveURL(/q=second\+search/);
   await page.goBack();

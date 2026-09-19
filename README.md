@@ -10,7 +10,7 @@ The web client provides registration, login, task search and status filtering, p
 - Maven Wrapper 3.3.4 with Maven 3.9.11
 - MySQL 8.4.11
 - Node.js 24.19.x and npm 11.17.0
-- React 19.3.0, Vite 8.3.0, TypeScript 6.0.3 and Tailwind CSS 4.3.3
+- React 19.3.0, Vite 8.3.0, TypeScript 6.0.3, Tailwind CSS 4.3.3 and Framer Motion 13.4.0
 
 Dependency and container versions are fixed. Production base images are also pinned by digest.
 

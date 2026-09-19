@@ -1,5 +1,6 @@
 import * as Toast from "@radix-ui/react-toast";
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
 import { I18nextProvider } from "react-i18next";
 import type { PropsWithChildren } from "react";
 
@@ -18,14 +19,16 @@ export function AppProviders({
   return (
     <I18nextProvider i18n={i18n}>
       <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <SessionProvider>
-            <Toast.Provider swipeDirection="right">
-              {children}
-              <Toast.Viewport className="fixed right-4 bottom-4 z-50 grid w-[min(24rem,calc(100vw-2rem))] gap-3 outline-none" />
-            </Toast.Provider>
-          </SessionProvider>
-        </QueryClientProvider>
+        <MotionConfig reducedMotion="user">
+          <QueryClientProvider client={queryClient}>
+            <SessionProvider>
+              <Toast.Provider swipeDirection="right">
+                {children}
+                <Toast.Viewport className="fixed right-4 bottom-4 z-50 grid w-[min(24rem,calc(100vw-2rem))] gap-3 outline-none" />
+              </Toast.Provider>
+            </SessionProvider>
+          </QueryClientProvider>
+        </MotionConfig>
       </ThemeProvider>
     </I18nextProvider>
   );

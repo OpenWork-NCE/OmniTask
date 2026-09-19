@@ -119,6 +119,33 @@ select {
   color: var(--ot-text);
 }
 
+.abstract-motion-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.abstract-motion-image {
+  position: absolute;
+  inset: -2%;
+  width: 104%;
+  height: 104%;
+  object-fit: cover;
+  opacity: 0.1;
+  will-change: transform;
+}
+
+.abstract-motion-layer-matrix {
+  position: fixed;
+  opacity: 0.32;
+}
+
+.abstract-motion-layer-matrix .abstract-motion-image {
+  opacity: 0.065;
+}
+
 .auth-shell-login {
   background-image: url("../assets/backgrounds/horizon-light-mobile.svg");
 }
@@ -173,7 +200,6 @@ select {
   padding: clamp(1.25rem, 5vw, 2.5rem);
   box-shadow: 0 2rem 5rem rgb(11 13 18 / 0.16);
   backdrop-filter: blur(16px);
-  animation: auth-card-enter 220ms ease-out both;
 }
 
 .auth-card h1 {
@@ -233,10 +259,17 @@ select {
   color: color-mix(in srgb, #b45309 80%, var(--ot-text));
 }
 
-@keyframes auth-card-enter {
+@keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(0.5rem);
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(1rem) scale(0.98);
   }
 }
 
@@ -288,6 +321,10 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .abstract-motion-image {
+    will-change: auto;
+  }
+
   *,
   *::before,
   *::after {
