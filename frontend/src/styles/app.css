@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Unbounded";
+  src: url("../assets/fonts/Unbounded-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Funnel Display";
+  src: url("../assets/fonts/FunnelDisplay-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --ot-canvas: #f5f4f0;
+  --ot-surface: #ffffff;
+  --ot-elevated: #f9fafc;
+  --ot-text: #0b0d12;
+  --ot-muted: #566174;
+  --ot-brand: #3159db;
+  --ot-on-brand: #ffffff;
+  --ot-border: #818a9a;
+  --ot-danger: #b42318;
+  --ot-focus: #3159db;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ot-canvas: #0b0d12;
+  --ot-surface: #151922;
+  --ot-elevated: #1b2130;
+  --ot-text: #f5f4f0;
+  --ot-muted: #b8bfcd;
+  --ot-brand: #4169f5;
+  --ot-on-brand: #ffffff;
+  --ot-border: #3e485c;
+  --ot-danger: #ff8a80;
+  --ot-focus: #91a8ff;
+}
+
+@theme inline {
+  --color-canvas: var(--ot-canvas);
+  --color-surface: var(--ot-surface);
+  --color-elevated: var(--ot-elevated);
+  --color-primary: var(--ot-text);
+  --color-muted: var(--ot-muted);
+  --color-brand: var(--ot-brand);
+  --color-on-brand: var(--ot-on-brand);
+  --color-border: var(--ot-border);
+  --color-danger: var(--ot-danger);
+  --color-focus: var(--ot-focus);
+  --font-display: "Unbounded", sans-serif;
+  --font-body: "Funnel Display", sans-serif;
+}
+
+html {
+  min-width: 320px;
+  background: var(--ot-canvas);
+  font-family: "Funnel Display", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+  background: var(--ot-canvas);
+  color: var(--ot-text);
+  font-size: 1rem;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ot-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
