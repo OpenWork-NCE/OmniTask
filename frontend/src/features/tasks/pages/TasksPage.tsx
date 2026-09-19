@@ -1,22 +1,33 @@
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
+import { ToastRegion } from "@/components/ui/ToastRegion";
+import { isApiProblem } from "@/lib/api/problem";
 
-import { listTasks } from "../api/tasks-api";
-import type { TaskQuery, TaskStatus } from "../api/task-types";
+import { createTask, deleteTask, listTasks, updateTask } from "../api/tasks-api";
+import type { Task, TaskQuery, TaskStatus } from "../api/task-types";
+import { DeleteTaskDialog } from "../components/DeleteTaskDialog";
+import { TaskEditorDialog } from "../components/TaskEditorDialog";
 import { TaskList, TaskListSkeleton } from "../components/TaskList";
 import { TaskPagination } from "../components/TaskPagination";
 import { TaskToolbar } from "../components/TaskToolbar";
 import { TasksEmptyState } from "../components/TasksEmptyState";
 import { readTaskQuery, writeTaskQuery } from "../query/task-query-state";
+import type { TaskFormValues } from "../schemas/task-schema";
 
 export function TasksPage() {
   const { i18n, t } = useTranslation();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [editorTask, setEditorTask] = useState<Task | null | undefined>();
+  const [deleteSelection, setDeleteSelection] = useState<Task | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const serializedSearch = searchParams.toString();
   const query = useMemo(
     () => readTaskQuery(new URLSearchParams(serializedSearch)),
@@ -26,6 +37,19 @@ export function TasksPage() {
     queryKey: ["tasks", query],
     queryFn: ({ signal }) => listTasks(query, signal)
   });
+  const saveMutation = useMutation({
+    mutationFn: async (values: TaskFormValues) => {
+      const input = {
+        title: values.title,
+        description: values.description === "" ? null : values.description,
+        status: values.status
+      };
+      return editorTask
+        ? updateTask(editorTask.id, { ...input, version: editorTask.version })
+        : createTask(input);
+    }
+  });
+  const deleteMutation = useMutation({ mutationFn: deleteTask });
 
   function updateQuery(update: Partial<TaskQuery>, replace = false) {
     setSearchParams(writeTaskQuery({ ...query, ...update }), { replace });
@@ -33,6 +57,55 @@ export function TasksPage() {
 
   function changeStatus(status: TaskStatus | null) {
     updateQuery({ status, page: 0 });
+  }
+
+  function closeEditor() {
+    if (saveMutation.isPending) return;
+    setEditorTask(undefined);
+    setEditorError(null);
+    setConflict(false);
+  }
+
+  async function save(values: TaskFormValues) {
+    setEditorError(null);
+    setConflict(false);
+    try {
+      const wasEditing = Boolean(editorTask);
+      await saveMutation.mutateAsync(values);
+      setEditorTask(undefined);
+      setToast(t(wasEditing ? "toasts.taskUpdated" : "toasts.taskCreated"));
+      await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    } catch (error) {
+      if (isApiProblem(error) && error.code === "TASK_VERSION_CONFLICT") {
+        setConflict(true);
+        setEditorError(t("errors.conflict"));
+      } else {
+        setEditorError(t("errors.generic"));
+      }
+    }
+  }
+
+  async function reloadAfterConflict() {
+    setEditorTask(undefined);
+    setEditorError(null);
+    setConflict(false);
+    await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+  }
+
+  async function confirmDelete() {
+    if (!deleteSelection) return;
+    try {
+      await deleteMutation.mutateAsync(deleteSelection.id);
+      setDeleteSelection(null);
+      setToast(t("toasts.taskDeleted"));
+      await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    } catch (error) {
+      setDeleteSelection(null);
+      setToast(
+        isApiProblem(error) && error.status === 404 ? t("errors.taskMissing") : t("errors.generic")
+      );
+      await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }
   }
 
   return (
@@ -67,6 +140,11 @@ export function TasksPage() {
           status={query.status}
           onSearchChange={(q) => updateQuery({ q, page: 0 }, true)}
           onStatusChange={changeStatus}
+          onCreate={() => {
+            setEditorError(null);
+            setConflict(false);
+            setEditorTask(null);
+          }}
         />
         {tasks.isPending ? <TaskListSkeleton /> : null}
         {tasks.isError ? (
@@ -80,7 +158,17 @@ export function TasksPage() {
             </Button>
           </section>
         ) : null}
-        {tasks.data?.items.length ? <TaskList tasks={tasks.data.items} /> : null}
+        {tasks.data?.items.length ? (
+          <TaskList
+            tasks={tasks.data.items}
+            onEdit={(task) => {
+              setEditorError(null);
+              setConflict(false);
+              setEditorTask(task);
+            }}
+            onDelete={setDeleteSelection}
+          />
+        ) : null}
         {tasks.data?.items.length === 0 ? (
           <TasksEmptyState filtered={Boolean(query.q || query.status)} />
         ) : null}
@@ -92,6 +180,26 @@ export function TasksPage() {
           />
         ) : null}
       </main>
+      {editorTask !== undefined ? (
+        <TaskEditorDialog
+          key={editorTask?.id ?? "create"}
+          conflict={conflict}
+          error={editorError}
+          onClose={closeEditor}
+          onReload={() => void reloadAfterConflict()}
+          onSubmit={save}
+          open
+          pending={saveMutation.isPending}
+          task={editorTask}
+        />
+      ) : null}
+      <DeleteTaskDialog
+        onCancel={() => setDeleteSelection(null)}
+        onConfirm={() => void confirmDelete()}
+        pending={deleteMutation.isPending}
+        task={deleteSelection}
+      />
+      <ToastRegion message={toast} onDismiss={() => setToast(null)} />
     </AppShell>
   );
 }

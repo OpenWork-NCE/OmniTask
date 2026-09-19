@@ -1,11 +1,17 @@
 import type { Task } from "../api/task-types";
 import { TaskItem } from "./TaskItem";
 
-export function TaskList({ tasks }: Readonly<{ tasks: readonly Task[] }>) {
+type TaskListProps = Readonly<{
+  tasks: readonly Task[];
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
+}>;
+
+export function TaskList({ onDelete, onEdit, tasks }: TaskListProps) {
   return (
     <div className="grid gap-3" aria-live="polite">
       {tasks.map((task) => (
-        <TaskItem key={task.id} task={task} />
+        <TaskItem key={task.id} onDelete={onDelete} onEdit={onEdit} task={task} />
       ))}
     </div>
   );

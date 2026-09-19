@@ -54,9 +54,13 @@ export const en = {
       create: "Create a task",
       edit: "Edit task",
       delete: "Delete task",
+      editNamed: "Edit task {{title}}",
+      deleteNamed: "Delete task {{title}}",
+      saveTask: "Save task",
       save: "Save changes",
       cancel: "Cancel",
-      retry: "Try again"
+      retry: "Try again",
+      reload: "Reload task list"
     },
     fields: {
       title: "Title",
@@ -75,7 +79,12 @@ export const en = {
       placeholder: "Search by title or description"
     },
     count: "{{formattedCount}} task",
-    count_other: "{{formattedCount}} tasks"
+    count_other: "{{formattedCount}} tasks",
+    validation: {
+      titleRequired: "Enter a task title.",
+      titleTooLong: "Title must contain no more than 200 characters.",
+      descriptionTooLong: "Description must contain no more than 5,000 characters."
+    }
   },
   status: {
     label: "Task status",
@@ -104,7 +113,9 @@ export const en = {
     invalidCredentials: "The email address or password is incorrect.",
     duplicateEmail: "An account already exists for this email address.",
     sessionExpired: "Your session has expired",
-    conflict: "This task changed while you were editing it. The latest version is now displayed."
+    conflict:
+      "This task changed elsewhere while you were editing. Reload the task list before trying again.",
+    taskMissing: "This task is no longer available."
   },
   toasts: {
     taskCreated: "Task created",

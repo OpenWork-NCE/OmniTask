@@ -56,9 +56,13 @@ export const fr = {
       create: "Créer une tâche",
       edit: "Modifier la tâche",
       delete: "Supprimer la tâche",
+      editNamed: "Modifier la tâche {{title}}",
+      deleteNamed: "Supprimer la tâche {{title}}",
+      saveTask: "Enregistrer la tâche",
       save: "Enregistrer",
       cancel: "Annuler",
-      retry: "Réessayer"
+      retry: "Réessayer",
+      reload: "Recharger la liste"
     },
     fields: {
       title: "Titre",
@@ -77,7 +81,12 @@ export const fr = {
       placeholder: "Rechercher par titre ou description"
     },
     count: "{{formattedCount}} tâche",
-    count_other: "{{formattedCount}} tâches"
+    count_other: "{{formattedCount}} tâches",
+    validation: {
+      titleRequired: "Saisissez un titre pour la tâche.",
+      titleTooLong: "Le titre ne doit pas dépasser 200 caractères.",
+      descriptionTooLong: "La description ne doit pas dépasser 5 000 caractères."
+    }
   },
   status: {
     label: "Statut de la tâche",
@@ -106,7 +115,9 @@ export const fr = {
     invalidCredentials: "L’adresse e-mail ou le mot de passe est incorrect.",
     duplicateEmail: "Un compte existe déjà pour cette adresse e-mail.",
     sessionExpired: "Votre session a expiré",
-    conflict: "Cette tâche a changé pendant votre modification. La dernière version est affichée."
+    conflict:
+      "Cette tâche a été modifiée ailleurs pendant votre saisie. Rechargez la liste avant de réessayer.",
+    taskMissing: "Cette tâche n’est plus disponible."
   },
   toasts: {
     taskCreated: "Tâche créée",
